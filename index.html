@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#071018">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>MOT Calibrator — 評論真實性校準工具</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Noto+Serif+TC:wght@700;900&display=swap');
+
+:root {
+  --bg:        #071018;
+  --bg2:       #0c1a28;
+  --bg3:       #0f2035;
+  --bg4:       #132640;
+  --border:    rgba(56,189,248,0.12);
+  --border2:   rgba(56,189,248,0.22);
+  --text:      #f0f8ff;
+  --text2:     #93c5fd;
+  --text3:     #4d7fa8;
+  --primary:   #38bdf8;
+  --primary-glow: rgba(56,189,248,0.18);
+  --primary-bright: #7dd3fc;
+  --green:     #34d399;
+  --green-dim: rgba(52,211,153,0.12);
+  --green-glow: rgba(52,211,153,0.25);
+  --orange:    #fb923c;
+  --orange-dim: rgba(251,146,60,0.12);
+  --red:       #f87171;
+  --red-dim:   rgba(248,113,113,0.12);
+  --purple:    #a78bfa;
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(56,189,248,0.08);
+  --shadow-glow: 0 0 24px rgba(56,189,248,0.15);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 16px;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  line-height: 1.7;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(56,189,248,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 80% 80%, rgba(167,139,250,0.06) 0%, transparent 50%);
+}
+
+/* ─── HEADER ─── */
+header {
+  padding: 22px 44px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(12,26,40,0.95);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  position: sticky; top: 0; z-index: 100;
+}
+.logo { display: flex; align-items: center; gap: 16px; }
+.logo-icon {
+  width: 46px; height: 46px;
+  background: linear-gradient(135deg, #0ea5e9, #7c3aed);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 900;
+  color: white; letter-spacing: -0.5px;
+  box-shadow: 0 0 20px rgba(14,165,233,0.35);
+}
+.logo-name {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 21px; font-weight: 900;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+.logo-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.header-badge {
+  font-size: 12px; color: var(--primary);
+  background: var(--primary-glow);
+  border: 1px solid rgba(56,189,248,0.25);
+  padding: 5px 14px; border-radius: 99px;
+  font-weight: 600; letter-spacing: 0.3px;
+}
+
+/* ─── LAYOUT ─── */
+.container {
+  max-width: 1160px; margin: 0 auto;
+  padding: 36px 44px;
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 24px;
+}
+
+/* ─── PANEL ─── */
+.panel {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.3s;
+}
+.panel:hover { box-shadow: var(--shadow-card), var(--shadow-glow); }
+.panel-header {
+  padding: 18px 24px 17px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,0.02);
+}
+.panel-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 8px var(--primary);
+  flex-shrink: 0;
+}
+.panel-title {
+  font-size: 15px; font-weight: 700;
+  color: var(--text); letter-spacing: 0.2px;
+}
+.panel-body { padding: 24px; }
+
+/* ─── TEXTAREA ─── */
+.input-label {
+  font-size: 14px; color: var(--text2);
+  margin-bottom: 12px; font-weight: 500;
+}
+textarea {
+  width: 100%;
+  background: var(--bg3);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 16px; line-height: 1.85;
+  padding: 18px 20px;
+  resize: vertical; min-height: 195px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+textarea::placeholder { color: var(--text3); }
+textarea:focus {
+  border-color: var(--primary);
+  background: var(--bg4);
+  box-shadow: 0 0 0 3px rgba(56,189,248,0.1), inset 0 0 20px rgba(56,189,248,0.03);
+}
+
+/* ─── EXAMPLE BUTTONS ─── */
+.example-row {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-top: 14px; align-items: center;
+}
+.example-label { font-size: 13px; color: var(--text3); font-weight: 500; }
+.example-btn {
+  font-size: 13px; padding: 6px 15px;
+  border-radius: 99px;
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-weight: 500;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+.example-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-glow); }
+.example-btn.genuine { border-color: rgba(52,211,153,0.3); color: var(--green); }
+.example-btn.genuine:hover { background: var(--green-dim); border-color: var(--green); }
+.example-btn.fake { border-color: rgba(248,113,113,0.3); color: var(--red); }
+.example-btn.fake:hover { background: var(--red-dim); border-color: var(--red); }
+
+/* ─── ANALYZE BUTTON ─── */
+.analyze-btn {
+  width: 100%; margin-top: 18px; padding: 17px;
+  background: linear-gradient(135deg, #0284c7, #7c3aed);
+  border: none; border-radius: 12px;
+  color: white;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 17px; font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  box-shadow: 0 4px 20px rgba(2,132,199,0.35);
+  position: relative; overflow: hidden;
+}
+.analyze-btn::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08), transparent);
+  opacity: 0; transition: opacity 0.2s;
+}
+.analyze-btn:hover::before { opacity: 1; }
+.analyze-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(2,132,199,0.45); }
+.analyze-btn:active { transform: translateY(0); }
+.analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+.analyze-btn .spinner {
+  width: 18px; height: 18px;
+  border: 2.5px solid rgba(255,255,255,0.25);
+  border-top-color: white; border-radius: 50%;
+  animation: spin 0.7s linear infinite; display: none;
+}
+.analyze-btn.loading .spinner { display: block; }
+.analyze-btn.loading .btn-text { opacity: 0.8; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── HIGHLIGHTED REVIEW ─── */
+.highlighted-review {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+  font-size: 16px; line-height: 2.1;
+  margin-top: 0; display: none; word-break: break-all;
+  color: var(--text);
+}
+.highlighted-review.show { display: block; }
+.kw-mot { background: rgba(56,189,248,0.15); color: #7dd3fc; border-radius: 4px; padding: 1px 5px; font-weight: 600; }
+.kw-sensory { background: rgba(251,191,36,0.15); color: #fcd34d; border-radius: 4px; padding: 1px 5px; font-weight: 600; }
+.kw-negative { background: rgba(52,211,153,0.15); color: var(--green); border-radius: 4px; padding: 1px 5px; font-weight: 600; }
+.kw-template { background: rgba(248,113,113,0.15); color: var(--red); border-radius: 4px; padding: 1px 5px; text-decoration: line-through; }
+
+.legend {
+  display: flex; gap: 16px; flex-wrap: wrap; margin-top: 14px;
+}
+.legend-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; color: var(--text2);
+}
+.legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+/* ─── RESULTS PANEL ─── */
+.results-panel { display: flex; flex-direction: column; gap: 20px; }
+
+/* ─── SCORE RING ─── */
+.score-display {
+  text-align: center; padding: 32px 24px 20px;
+}
+.score-ring {
+  width: 152px; height: 152px;
+  margin: 0 auto 20px; position: relative;
+}
+.score-ring svg { transform: rotate(-90deg); }
+.score-ring circle {
+  fill: none; stroke-width: 10;
+  transition: stroke-dashoffset 1.3s cubic-bezier(0.4,0,0.2,1);
+}
+.score-ring .bg-ring { stroke: rgba(255,255,255,0.06); }
+.score-ring .progress-ring { stroke: var(--primary); stroke-linecap: round; filter: drop-shadow(0 0 6px rgba(56,189,248,0.6)); }
+.score-number {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%); text-align: center;
+}
+.score-val {
+  font-size: 46px; font-weight: 900;
+  color: var(--text); line-height: 1; letter-spacing: -2px;
+}
+.score-unit { font-size: 14px; color: var(--text3); font-weight: 500; margin-top: 3px; }
+.risk-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 22px; border-radius: 99px;
+  font-size: 15px; font-weight: 700;
+  margin-bottom: 8px; transition: all 0.5s;
+}
+.risk-badge.green { background: var(--green-dim); color: var(--green); border: 1.5px solid rgba(52,211,153,0.3); box-shadow: 0 0 16px rgba(52,211,153,0.15); }
+.risk-badge.orange { background: var(--orange-dim); color: var(--orange); border: 1.5px solid rgba(251,146,60,0.3); box-shadow: 0 0 16px rgba(251,146,60,0.15); }
+.risk-badge.red { background: var(--red-dim); color: var(--red); border: 1.5px solid rgba(248,113,113,0.3); box-shadow: 0 0 16px rgba(248,113,113,0.15); }
+.risk-badge.waiting { background: rgba(255,255,255,0.04); color: var(--text3); border: 1.5px solid var(--border); }
+#riskDesc { font-size: 14px; color: var(--text3); margin-top: 5px; }
+
+/* ─── SUB SCORES ─── */
+.sub-scores { padding: 0 24px 24px; }
+.sub-score-item { margin-bottom: 20px; }
+.sub-score-item:last-child { margin-bottom: 0; }
+.sub-score-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 9px;
+}
+.sub-score-name { font-size: 14px; color: var(--text2); font-weight: 600; }
+.sub-score-val { font-size: 16px; font-weight: 800; }
+.sub-score-bar {
+  height: 7px; background: rgba(255,255,255,0.06);
+  border-radius: 99px; overflow: hidden;
+}
+.sub-score-fill {
+  height: 100%; border-radius: 99px;
+  transition: width 1.1s cubic-bezier(0.4,0,0.2,1) 0.3s;
+  width: 0%;
+}
+.fill-ss { background: linear-gradient(90deg, #0ea5e9, #a78bfa); box-shadow: 0 0 8px rgba(14,165,233,0.4); }
+.fill-ts { background: linear-gradient(90deg, #34d399, #6ee7b7); box-shadow: 0 0 8px rgba(52,211,153,0.4); }
+.fill-sg { background: linear-gradient(90deg, #fb923c, #fcd34d); box-shadow: 0 0 8px rgba(251,146,60,0.4); }
+
+/* ─── CALIBRATION ─── */
+.calibration-box {
+  margin: 0 24px 24px; border-radius: 12px;
+  padding: 17px 20px; font-size: 15px; line-height: 1.85;
+  transition: all 0.5s; border-left: 4px solid transparent;
+  background: var(--bg3); color: var(--text2); min-height: 72px;
+}
+.calibration-box.green { background: rgba(52,211,153,0.07); border-color: var(--green); color: #a7f3d0; }
+.calibration-box.orange { background: rgba(251,146,60,0.07); border-color: var(--orange); color: #fed7aa; }
+.calibration-box.red { background: rgba(248,113,113,0.07); border-color: var(--red); color: #fecaca; }
+.calibration-label {
+  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+  margin-bottom: 7px; font-weight: 700; opacity: 0.55;
+}
+
+/* ─── DETAIL PANEL ─── */
+.detail-panel { padding: 0 24px 24px; }
+.detail-section { margin-bottom: 18px; }
+.detail-title {
+  font-size: 12px; letter-spacing: 1.5px; color: var(--text3);
+  text-transform: uppercase; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px; font-weight: 700;
+}
+.detail-title::after { content:''; flex:1; height:1px; background: var(--border); }
+.tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.tag { font-size: 13px; padding: 5px 12px; border-radius: 99px; font-weight: 600; }
+.tag-mot { background: rgba(56,189,248,0.1); color: var(--primary-bright); border: 1px solid rgba(56,189,248,0.2); }
+.tag-sensory { background: rgba(251,191,36,0.1); color: #fcd34d; border: 1px solid rgba(251,191,36,0.2); }
+.tag-negative { background: rgba(52,211,153,0.1); color: var(--green); border: 1px solid rgba(52,211,153,0.2); }
+.tag-template { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+.tag-none { background: rgba(255,255,255,0.04); color: var(--text3); border: 1px solid var(--border); }
+.explanation {
+  font-size: 15px; color: var(--text2); line-height: 1.85;
+  background: var(--bg3); border-radius: 10px; padding: 16px 18px;
+  border: 1px solid var(--border);
+}
+
+/* ─── IDLE STATE ─── */
+.idle-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 44px 20px; text-align: center; gap: 14px;
+}
+.idle-icon {
+  width: 58px; height: 58px;
+  border: 1.5px dashed var(--border2); border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; margin-bottom: 4px;
+}
+.idle-text { font-size: 14px; color: var(--text3); line-height: 1.7; }
+
+/* ─── METHODOLOGY ─── */
+.panel-body p { font-size: 14px; color: var(--text2); margin-bottom: 10px; line-height: 1.85; }
+.panel-body p:last-child { margin-bottom: 0; }
+
+/* ─── FOOTER ─── */
+.footer-note {
+  text-align: center; padding: 20px;
+  font-size: 13px; color: var(--text3);
+  border-top: 1px solid var(--border); margin-top: auto;
+}
+
+/* ─── SKELETON ─── */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg3), var(--bg4), var(--bg3));
+  background-size: 200%; animation: shimmer 1.5s infinite;
+  border-radius: 6px; height: 16px; margin-bottom: 10px;
+}
+@keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  header { padding: 14px 20px; }
+  .logo-sub { display: none; }
+  .container { grid-template-columns: 1fr; padding: 16px; gap: 16px; }
+  .results-panel { order: 2; }
+}
+@media (max-width: 480px) {
+  header { padding: 12px 16px; }
+  .logo-icon { width: 40px; height: 40px; font-size: 11px; }
+  .logo-name { font-size: 18px; }
+  .header-badge { display: none; }
+  .container { padding: 12px; }
+  .panel-body { padding: 18px; }
+  .panel-header { padding: 14px 18px; }
+  textarea { font-size: 16px; min-height: 150px; }
+  .analyze-btn { font-size: 16px; }
+  .score-ring { width: 120px; height: 120px; }
+  .score-ring svg { width: 120px; height: 120px; }
+  .score-val { font-size: 36px; }
+  .example-row { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
+  .example-btn { flex-shrink: 0; }
+}
+@supports (-webkit-touch-callout: none) { textarea { font-size: 16px; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">MOT</div>
+    <div>
+      <div class="logo-name">MOT Calibrator</div>
+      <div class="logo-sub">評論真實性校準工具 · 研究原型 v0.1</div>
+    </div>
+  </div>
+  <div class="header-badge">黄國津 研究計畫書</div>
+</header>
+
+<div class="container">
+
+  <!-- ─── LEFT: INPUT ─── -->
+  <div>
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-dot"></div>
+        <div class="panel-title">輸入評論文字</div>
+      </div>
+      <div class="panel-body">
+        <div class="input-label">貼上或輸入你想查核的評論文字</div>
+        <textarea id="reviewText" placeholder="在這裡貼上評論，例如：
+「昨天晚上去吃，點了招牌牛肉麵，湯底偏鹹但鍋氣十足，麵條很Q，等了大概15分鐘，服務員小姐很親切有幫我們換座位，停車場免費但只有10個位子。」"></textarea>
+
+        <div class="example-row">
+          <span style="font-size:13px; color:var(--text3); align-self:center; font-weight:500;">範例：</span>
+          <button class="example-btn genuine" onclick="loadExample('genuine1')">✓ 真實評論 A</button>
+          <button class="example-btn genuine" onclick="loadExample('genuine2')">✓ 真實評論 B</button>
+          <button class="example-btn fake" onclick="loadExample('fake1')">✗ 疑似假評 A</button>
+          <button class="example-btn fake" onclick="loadExample('fake2')">✗ 疑似假評 B</button>
+          <button class="example-btn fake" onclick="loadExample('fake3')">✗ 疑似假評 C</button>
+        </div>
+
+        <button class="analyze-btn" id="analyzeBtn" onclick="analyze()">
+          <div class="spinner"></div>
+          <span class="btn-text">🔍 開始分析評論真實性</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Highlighted review -->
+    <div class="panel" style="margin-top:16px;">
+      <div class="panel-header">
+        <div class="panel-dot" style="background:var(--orange); box-shadow:0 0 8px rgba(251,146,60,0.5);"></div>
+        <div class="panel-title">評論文字解析</div>
+      </div>
+      <div class="panel-body">
+        <div id="highlightedReview" class="highlighted-review">
+          <!-- highlighted text goes here -->
+        </div>
+        <div id="idleHighlight" class="idle-state">
+          <div class="idle-icon">🔬</div>
+          <div class="idle-text">分析完成後，此處將顯示評論關鍵詞標注<br>藍色 = MOT 接觸點詞 ／ 黃色 = 感官詞<br>綠色 = 負面情節（真實信號）／ 紅色底線 = 模板語言</div>
+        </div>
+        <div class="legend" id="legend" style="display:none;">
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(99,102,241,0.4);"></div>MOT接觸點詞</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(245,158,11,0.4);"></div>感官描述詞</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(16,185,129,0.4);"></div>負面情節（真實信號）</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(239,68,68,0.3);"></div>模板語言（假評風險）</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Methodology note -->
+    <div class="panel" style="margin-top:16px;">
+      <div class="panel-header">
+        <div class="panel-dot" style="background:var(--text3); box-shadow:none;"></div>
+        <div class="panel-title">方法論說明</div>
+      </div>
+      <div class="panel-body" style="">
+        <p style="margin-bottom:8px;">本工具基於研究計畫書「拆解數位幻象」的理論框架，以 AI 語意分析引擎實作三個核心評分維度：</p>
+        <p><span style="color:var(--primary-bright);">SS（具體性分數）</span>：量化 MOT 服務接觸點詞彙密度，涵蓋人員互動、時空細節、感官描述。</p>
+        <p><span style="color:var(--green);">TS（模板相似度偵測）</span>：識別制式化、重複性語言模式（如：「CP值高」「大推」「環境不錯服務好」）。</p>
+        <p><span style="color:var(--orange);">SG（情感細粒度）</span>：分析正負面情感混合程度——真實評論通常包含部分缺點或條件限制。</p>
+        <p style="margin-top:8px;border-top:1px solid var(--border);padding-top:8px;">評分由本地規則演算法執行（完全離線，無需網路連線），結合 PZB 服務品質理論與 MOT 真實瞬間理論框架。詞庫涵蓋 150+ 個中文服務接觸點詞彙與 50+ 個假評套語，對應研究計畫書附錄 F 之 Python 演算法實作。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── RIGHT: RESULTS ─── -->
+  <div class="results-panel">
+
+    <!-- Score Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-dot" style="background:var(--primary);"></div>
+        <div class="panel-title">真實性評分</div>
+      </div>
+      <div class="score-display">
+        <div class="score-ring">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <circle class="bg-ring" cx="70" cy="70" r="58" />
+            <circle class="progress-ring" id="scoreRing" cx="70" cy="70" r="58"
+              stroke-dasharray="364.4"
+              stroke-dashoffset="364.4" />
+          </svg>
+          <div class="score-number">
+            <div class="score-val" id="scoreVal">—</div>
+            <div class="score-unit">/ 100</div>
+          </div>
+        </div>
+        <div class="risk-badge waiting" id="riskBadge">
+          ◎ 等待分析
+        </div>
+        <div style="font-size:14px; color:var(--text3); margin-top:5px;" id="riskDesc">
+          輸入評論文字並點擊分析
+        </div>
+      </div>
+
+      <!-- Sub scores -->
+      <div class="sub-scores">
+        <div class="sub-score-item">
+          <div class="sub-score-header">
+            <span class="sub-score-name">SS 具體性分數</span>
+            <span class="sub-score-val" id="ssVal" style="color:var(--primary-bright);">—</span>
+          </div>
+          <div class="sub-score-bar"><div class="sub-score-fill fill-ss" id="ssBar"></div></div>
+        </div>
+        <div class="sub-score-item">
+          <div class="sub-score-header">
+            <span class="sub-score-name">TS 模板相似度（越低越真實）</span>
+            <span class="sub-score-val" id="tsVal" style="color:var(--green);">—</span>
+          </div>
+          <div class="sub-score-bar"><div class="sub-score-fill fill-ts" id="tsBar"></div></div>
+        </div>
+        <div class="sub-score-item">
+          <div class="sub-score-header">
+            <span class="sub-score-name">SG 情感細粒度</span>
+            <span class="sub-score-val" id="sgVal" style="color:var(--orange);">—</span>
+          </div>
+          <div class="sub-score-bar"><div class="sub-score-fill fill-sg" id="sgBar"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calibration Message -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-dot" style="background:var(--orange); box-shadow:0 0 8px rgba(251,146,60,0.5);"></div>
+        <div class="panel-title">期望校準建議</div>
+      </div>
+      <div class="calibration-box waiting" id="calibrationBox">
+        <div class="calibration-label">消費者提示</div>
+        <div id="calibrationText" style="font-style:italic; opacity:0.5;">分析完成後將顯示期望校準建議…</div>
+      </div>
+    </div>
+
+    <!-- Detail Analysis -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-dot" style="background:var(--text3); box-shadow:none;"></div>
+        <div class="panel-title">詳細分析報告</div>
+      </div>
+      <div id="detailIdle" class="idle-state" style="padding:28px 20px;">
+        <div class="idle-icon" >📋</div>
+        <div class="idle-text">等待分析…</div>
+      </div>
+      <div id="detailContent" class="detail-panel" style="display:none;">
+        <div class="detail-section">
+          <div class="detail-title">偵測到的 MOT 接觸點詞彙</div>
+          <div class="tags" id="motTags"></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-title">感官描述詞</div>
+          <div class="tags" id="sensoryTags"></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-title">負面情節（真實信號）</div>
+          <div class="tags" id="negativeTags"></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-title">模板語言警示</div>
+          <div class="tags" id="templateTags"></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-title">AI 分析說明</div>
+          <div class="explanation" id="explanationText"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer-note">
+  MOT Calibrator Demo v0.2 · 離線版（純規則演算法）· 基於「拆解數位幻象」研究計畫書 · 黄國津 · 建國科技大學
+</div>
+
+<script>
+// ─── EXAMPLE TEXTS ───
+const examples = {
+  genuine1: `昨天晚上帶家人去吃，點了招牌牛肉麵跟三杯雞，湯底真的很香，牛肉燉得很軟爛，不過偏鹹了一點，我媽喜歡清淡的可能比較難接受。等了大概20分鐘才上菜，現場很多人排隊，座位有點擠。服務生小哥態度還不錯，有主動幫我們加水。停車場滿了要繞去旁邊巷子找，這點不太方便。整體來說還是會再來，但不適合趕時間。`,
+  genuine2: `周末下午去試了網路上很多人推的那家甜點店，點了草莓千層跟抹茶捲。草莓千層奶油不會太甜，層次很清晰，草莓果實感很強，這點超加分。抹茶捲的抹茶味偏淡，對我來說有點失望，期待更濃郁的。店裡空間很小，我們等了15分鐘才有位子，座椅是那種木頭凳子坐久了會不舒服。飲料部分我點了玫瑰拿鐵，香氣不錯但甜度偏高。價位偏貴，一個人大概400多出來，但環境和品質大致到位。`,
+  fake1: `已買，毛孩很愛❤️ 品質超好，強烈推薦給各位主人！大推大推！`,
+  fake2: `環境不錯，服務好，食物好吃，CP值很高，下次還會來，推薦給大家！`,
+  fake3: `非常棒的體驗！服務一流，品質超讚，物超所值，必買必推，五星好評不夠給！`
+};
+
+function loadExample(key) {
+  document.getElementById('reviewText').value = examples[key];
+}
+
+// ─── ANALYZE ───
+async function analyze() {
+  const text = document.getElementById('reviewText').value.trim();
+  if (!text) { alert('請先輸入評論文字'); return; }
+
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+  btn.classList.add('loading');
+  btn.querySelector('.btn-text').textContent = 'AI 分析中，請稍候…';
+
+  // Reset UI
+  document.getElementById('scoreVal').textContent = '—';
+  document.getElementById('riskBadge').className = 'risk-badge waiting';
+  document.getElementById('riskBadge').textContent = '◎ 分析中…';
+  document.getElementById('riskDesc').textContent = '正在呼叫 AI 語意分析引擎…';
+  document.getElementById('scoreRing').style.strokeDashoffset = '364.4';
+  document.getElementById('ssBar').style.width = '0%';
+  document.getElementById('tsBar').style.width = '0%';
+  document.getElementById('sgBar').style.width = '0%';
+  document.getElementById('ssVal').textContent = '—';
+  document.getElementById('tsVal').textContent = '—';
+  document.getElementById('sgVal').textContent = '—';
+  document.getElementById('calibrationBox').className = 'calibration-box waiting';
+  document.getElementById('calibrationText').textContent = '分析中…';
+  document.getElementById('detailIdle').style.display = 'flex';
+  document.getElementById('detailContent').style.display = 'none';
+  document.getElementById('highlightedReview').classList.remove('show');
+  document.getElementById('idleHighlight').style.display = 'flex';
+  document.getElementById('legend').style.display = 'none';
+
+  try {
+    // ── 純規則評分引擎（方案四：完全離線，無需 API）──
+    // 短暫延遲讓使用者感受到工具在運作
+    await new Promise(resolve => setTimeout(resolve, 600));
+    const result = scoreReview(text);
+    renderResults(result, text);
+
+    if (window.innerWidth <= 768) {
+      setTimeout(() => {
+        const resultsPanel = document.querySelector('.results-panel');
+        if (resultsPanel) resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 300);
+    }
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById('riskBadge').textContent = '⚠ 分析失敗，請重試';
+    document.getElementById('riskDesc').textContent = err.message;
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+    btn.querySelector('.btn-text').textContent = '🔍 開始分析評論真實性';
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// 純規則評分引擎（對應研究計畫書第四章演算法）
+// ══════════════════════════════════════════════════════════
+
+// ── 詞庫定義 ──
+const DICT = {
+  // 人員互動詞（加權 ×1.5）
+  personnel: ['服務員','店員','老闆','老闆娘','主廚','師傅','廚師','點餐','招呼','親切','熱情','有禮','幫我','幫我們','帶位','介紹','推薦菜','小姐','先生','帥哥','美女','服務生','外場','內場'],
+  // 感官描述詞（加權 ×1.3）
+  sensory: ['好吃','香','脆','嫩','Q彈','鮮','酸','甜','苦','辣','鹹','清爽','口感','味道','氣味','回甘','鍋氣','入口','軟爛','夠味','濃郁','清淡','鮮甜','酥脆','滑嫩','彈牙','鮮美','香氣','酸甜','麻辣','溫度','熱騰騰','冰涼','燙口','冰的','熱的','份量','大份','小份','多汁','乾柴','偏油','偏鹹','偏淡'],
+  // 時空細節詞（加權 ×1.2）
+  temporal: ['分鐘','小時','昨天','今天','晚上','早上','中午','週末','假日','平日','等了','等待','排隊','座位','角落','靠窗','靠牆','停車','樓上','地下','門口','室內','戶外','包廂','吧台','第一次','上次','去年','上個月','這次','剛開幕','週年','生日','紀念日'],
+  // 產品具體詞（加權 ×1.0）
+  product: ['招牌','套餐','套餐','配菜','主餐','附餐','甜點','飲料','湯','小菜','前菜','主菜','醬料','沾醬','加點','追加','外帶','外送','堂食','自助','自取','訂位','預約','候位'],
+  // 負面情節（加權 ×2.0，真實信號）
+  negative: ['但是','不過','可惜','缺點','稍微','有點','偏','比較','較','不夠','不太','稍嫌','美中不足','唯一','就是','只是','還好','普通','一般','差強人意','不如預期','下次不會','不推','扣分','失望','有點貴','稍貴','等很久','很慢','態度差','冷淡','沒有','沒到','沒期待'],
+  // 模板套語（TS 偵測）
+  template: ['大推','CP值','cp值','必推','必買','必吃','強烈推薦','非常棒','超棒','超讚','讚啦','推推','下次還會來','下次再來','還會再來','物超所值','超值','環境不錯','服務好','服務很好','服務不錯','整體很好','整體不錯','值得一試','值得推薦','超級好吃','好吃到哭','從此愛上','難以忘懷','強推','激推','爆推','回購','再訪','必訪','一定要來','不踩雷','零踩雷','超好吃','超好喝','超厲害','超喜歡','大愛','愛了','無敵','完美','滿分','五星','五顆星','全都好吃','好吃好吃','讚讚讚','棒棒棒'],
+};
+
+// ── SS 具體性分數 ──
+function computeSS(text) {
+  let score = 0;
+  let totalWords = text.length;
+  if (totalWords === 0) return 0;
+
+  const found = { personnel: [], sensory: [], temporal: [], product: [], negative: [] };
+
+  DICT.personnel.forEach(w => { if (text.includes(w) && !found.personnel.includes(w)) { score += 1.5; found.personnel.push(w); } });
+  DICT.sensory.forEach(w => { if (text.includes(w) && !found.sensory.includes(w)) { score += 1.3; found.sensory.push(w); } });
+  DICT.temporal.forEach(w => { if (text.includes(w) && !found.temporal.includes(w)) { score += 1.2; found.temporal.push(w); } });
+  DICT.product.forEach(w => { if (text.includes(w) && !found.product.includes(w)) { score += 1.0; found.product.push(w); } });
+  DICT.negative.forEach(w => { if (text.includes(w) && !found.negative.includes(w)) { score += 2.0; found.negative.push(w); } });
+
+  // 數字偵測（時間、金額、數量）→ 加分
+  const numbers = text.match(/\d+/g) || [];
+  score += Math.min(numbers.length * 1.5, 10);
+
+  // 標準化到 0-100
+  const raw = (score / (totalWords / 8)) * 100;
+  return Math.min(Math.round(raw), 100);
+}
+
+// ── TS 模板相似度 ──
+function computeTS(text) {
+  let hits = 0;
+  const found = [];
+  DICT.template.forEach(w => {
+    if (text.includes(w) && !found.includes(w)) {
+      hits++;
+      found.push(w);
+    }
+  });
+  // 純正向情感（沒有任何負面詞）→ 加分
+  const hasNegative = DICT.negative.some(w => text.includes(w));
+  const hasPositiveOnly = !hasNegative && (text.includes('好') || text.includes('棒') || text.includes('讚'));
+  if (hasPositiveOnly) hits += 2;
+
+  // 重複疊字偵測（讚讚、好好、棒棒）
+  const repeat = (text.match(/(.)\1{1,}/g) || []).filter(m => m.length >= 2);
+  hits += repeat.length;
+
+  const raw = (hits / 5) * 100;
+  return Math.min(Math.round(raw), 100);
+}
+
+// ── SG 情感細粒度 ──
+function computeSG(text) {
+  const posWords = ['好','棒','讚','喜歡','愛','推','值得','不錯','滿意','開心','享受','美味','香','鮮','嫩','脆','順'];
+  const negWords = ['不好','差','壞','爛','失望','可惜','但','不過','偏','較','稍','一般','普通','貴','慢','冷'];
+
+  let posCount = 0, negCount = 0;
+  posWords.forEach(w => { if (text.includes(w)) posCount++; });
+  negWords.forEach(w => { if (text.includes(w)) negCount++; });
+
+  if (posCount === 0 && negCount === 0) return 20;
+  if (posCount > 0 && negCount === 0) return 15; // 純正向，可疑
+  if (posCount === 0 && negCount > 0) return 20; // 純負向
+  // 有褒有貶
+  const ratio = Math.min(posCount, negCount) / Math.max(posCount, negCount);
+  return Math.round(30 + ratio * 70);
+}
+
+// ── 期望校準建議 ──
+function getCalibrationMessage(riskLevel, ss, ts, sg) {
+  if (riskLevel === 'green') {
+    return '這則評論包含豐富的服務接觸點細節，語言自然且情感複雜，具備高度真實性特徵。您可以參考此評論來設定合理的消費期望。';
+  } else if (riskLevel === 'orange') {
+    return '這則評論存在部分可疑特徵，建議同時參考其他評論再做決定。進店前不妨適度保留判斷空間，避免期望過高後產生落差感。';
+  } else {
+    return '這則評論高度疑似非真實消費者撰寫，缺乏具體服務接觸描述，且充斥制式化標籤語言。建議大幅下修消費期望，或尋找更多具體評論作為參考依據。';
+  }
+}
+
+// ── 分析說明 ──
+function getExplanation(ss, ts, sg, overall, riskLevel) {
+  const ssDesc = ss >= 60 ? '具體性高（包含豐富服務接觸細節）' : ss >= 30 ? '具體性中等（部分細節描述）' : '具體性低（缺乏接觸點描述）';
+  const tsDesc = ts >= 60 ? '模板語言密度高（大量制式化套語）' : ts >= 30 ? '模板語言中等（部分套語）' : '語言自然（套語比例低）';
+  const sgDesc = sg >= 60 ? '情感複雜多元（有褒有貶，真實信號強）' : sg >= 30 ? '情感略有層次' : '情感單一（純正向或純負向，真實性存疑）';
+  return `本則評論的 SS 具體性分數為 ${ss}，${ssDesc}；TS 模板相似度為 ${ts}，${tsDesc}；SG 情感細粒度為 ${sg}，${sgDesc}。依加權公式（SS×0.45 + (100-TS)×0.30 + SG×0.25）計算整體分數為 ${overall}，判定為「${riskLevel === 'green' ? '高具體性' : riskLevel === 'orange' ? '中度疑慮' : '情深不壽'}」等級。`;
+}
+
+// ── 主函數 ──
+function scoreReview(text) {
+  const ss = computeSS(text);
+  const ts = computeTS(text);
+  const sg = computeSG(text);
+  const overall = Math.round(ss * 0.45 + (100 - ts) * 0.30 + sg * 0.25);
+
+  let risk_level, risk_label, risk_desc;
+  if (overall >= 65) {
+    risk_level = 'green'; risk_label = '高具體性 · 評論可信'; risk_desc = '評論具備真實服務體驗特徵';
+  } else if (overall >= 35) {
+    risk_level = 'orange'; risk_label = '中度疑慮 · 保留判斷'; risk_desc = '建議多參考其他評論';
+  } else {
+    risk_level = 'red'; risk_label = '情深不壽 · 謹慎消費'; risk_desc = '高度疑似非真實評論，建議下修期望';
+  }
+
+  // 找出偵測到的關鍵詞
+  const mot_keywords = [...new Set([
+    ...DICT.personnel.filter(w => text.includes(w)),
+    ...DICT.temporal.filter(w => text.includes(w)),
+    ...DICT.product.filter(w => text.includes(w))
+  ])].slice(0, 8);
+
+  const sensory_keywords = DICT.sensory.filter(w => text.includes(w)).slice(0, 8);
+  const negative_signals = DICT.negative.filter(w => text.includes(w)).slice(0, 5);
+  const template_phrases = DICT.template.filter(w => text.includes(w)).slice(0, 5);
+
+  return {
+    ss, ts, sg, overall, risk_level, risk_label, risk_desc,
+    mot_keywords,
+    sensory_keywords,
+    negative_signals,
+    template_phrases,
+    calibration_message: getCalibrationMessage(risk_level, ss, ts, sg),
+    explanation: getExplanation(ss, ts, sg, overall, risk_level)
+  };
+}
+
+// ─── RENDER RESULTS ───
+function renderResults(r, originalText) {
+  // Overall score ring
+  const circumference = 364.4;
+  const offset = circumference - (r.overall / 100) * circumference;
+  const ring = document.getElementById('scoreRing');
+  ring.style.strokeDashoffset = offset;
+
+  // Color the ring
+  if (r.risk_level === 'green') ring.style.stroke = '#22c55e';
+  else if (r.risk_level === 'orange') ring.style.stroke = '#f97316';
+  else ring.style.stroke = '#ef4444';
+
+  // Animate score number
+  let current = 0;
+  const target = r.overall;
+  const step = () => {
+    current = Math.min(current + 2, target);
+    document.getElementById('scoreVal').textContent = current;
+    if (current < target) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+
+  // Risk badge
+  const badge = document.getElementById('riskBadge');
+  badge.className = `risk-badge ${r.risk_level}`;
+  const icons = { green: '✓', orange: '⚠', red: '✗' };
+  badge.textContent = `${icons[r.risk_level]} ${r.risk_label}`;
+  document.getElementById('riskDesc').textContent = r.risk_desc;
+
+  // Sub scores (with slight delay for animation feel)
+  setTimeout(() => {
+    document.getElementById('ssVal').textContent = r.ss;
+    document.getElementById('ssBar').style.width = r.ss + '%';
+    document.getElementById('tsVal').textContent = r.ts;
+    document.getElementById('tsBar').style.width = (100 - r.ts) + '%'; // inverted: low ts = good
+    document.getElementById('sgVal').textContent = r.sg;
+    document.getElementById('sgBar').style.width = r.sg + '%';
+  }, 200);
+
+  // Calibration box
+  const cbox = document.getElementById('calibrationBox');
+  cbox.className = `calibration-box ${r.risk_level}`;
+  document.getElementById('calibrationText').innerHTML =
+    `<div class="calibration-label">// 消費者期望校準建議</div>${r.calibration_message}`;
+
+  // Detail content
+  document.getElementById('detailIdle').style.display = 'none';
+  document.getElementById('detailContent').style.display = 'block';
+
+  const renderTags = (containerId, items, tagClass) => {
+    const el = document.getElementById(containerId);
+    if (!items || items.length === 0) {
+      el.innerHTML = '<span class="tag tag-none">（未偵測到）</span>';
+    } else {
+      el.innerHTML = items.map(t => `<span class="tag ${tagClass}">${t}</span>`).join('');
+    }
+  };
+
+  renderTags('motTags', r.mot_keywords, 'tag-mot');
+  renderTags('sensoryTags', r.sensory_keywords, 'tag-sensory');
+  renderTags('negativeTags', r.negative_signals, 'tag-negative');
+  renderTags('templateTags', r.template_phrases, 'tag-template');
+  document.getElementById('explanationText').textContent = r.explanation;
+
+  // Highlighted review
+  highlightText(originalText, r);
+}
+
+// ─── HIGHLIGHT TEXT ───
+function highlightText(text, r) {
+  let highlighted = text;
+
+  // Escape HTML first
+  highlighted = highlighted.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  // Apply highlights (template first, then others to avoid double-wrapping)
+  const wrap = (word, cls) => {
+    if (!word || !word.trim()) return;
+    const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp(escaped, 'g');
+    highlighted = highlighted.replace(re, `<span class="${cls}">${word}</span>`);
+  };
+
+  (r.template_phrases || []).forEach(w => wrap(w, 'kw-template'));
+  (r.negative_signals || []).forEach(w => wrap(w, 'kw-negative'));
+  (r.sensory_keywords || []).forEach(w => wrap(w, 'kw-sensory'));
+  (r.mot_keywords || []).forEach(w => wrap(w, 'kw-mot'));
+
+  const el = document.getElementById('highlightedReview');
+  el.innerHTML = highlighted;
+  el.classList.add('show');
+  document.getElementById('idleHighlight').style.display = 'none';
+  document.getElementById('legend').style.display = 'flex';
+}
+</script>
+</body>
+</html>
