@@ -392,7 +392,7 @@ textarea:focus {
     <div class="logo-icon">MOT</div>
     <div>
       <div class="logo-name">MOT Calibrator</div>
-      <div class="logo-sub">評論真實性校準工具 · 研究原型 v0.1</div>
+      <div class="logo-sub">評論文字線索與期望校準 · 研究原型 v0.3</div>
     </div>
   </div>
   <div class="header-badge">黄國津 研究計畫書</div>
@@ -414,16 +414,16 @@ textarea:focus {
 
         <div class="example-row">
           <span style="font-size:13px; color:var(--text3); align-self:center; font-weight:500;">範例：</span>
-          <button class="example-btn genuine" onclick="loadExample('genuine1')">✓ 真實評論 A</button>
-          <button class="example-btn genuine" onclick="loadExample('genuine2')">✓ 真實評論 B</button>
-          <button class="example-btn fake" onclick="loadExample('fake1')">✗ 疑似假評 A</button>
-          <button class="example-btn fake" onclick="loadExample('fake2')">✗ 疑似假評 B</button>
-          <button class="example-btn fake" onclick="loadExample('fake3')">✗ 疑似假評 C</button>
+          <button class="example-btn genuine" onclick="loadExample('genuine1')">細節較多範例 A</button>
+          <button class="example-btn genuine" onclick="loadExample('genuine2')">細節較多範例 B</button>
+          <button class="example-btn fake" onclick="loadExample('fake1')">套語較多範例 A</button>
+          <button class="example-btn fake" onclick="loadExample('fake2')">套語較多範例 B</button>
+          <button class="example-btn fake" onclick="loadExample('fake3')">套語較多範例 C</button>
         </div>
 
         <button class="analyze-btn" id="analyzeBtn" onclick="analyze()">
           <div class="spinner"></div>
-          <span class="btn-text">🔍 開始分析評論真實性</span>
+          <span class="btn-text">🔍 分析評論文字線索</span>
         </button>
       </div>
     </div>
@@ -440,13 +440,13 @@ textarea:focus {
         </div>
         <div id="idleHighlight" class="idle-state">
           <div class="idle-icon">🔬</div>
-          <div class="idle-text">分析完成後，此處將顯示評論關鍵詞標注<br>藍色 = MOT 接觸點詞 ／ 黃色 = 感官詞<br>綠色 = 負面情節（真實信號）／ 紅色底線 = 模板語言</div>
+          <div class="idle-text">分析完成後，此處將顯示評論關鍵詞標注<br>藍色 = MOT 接觸點詞 ／ 黃色 = 感官詞<br>綠色 = 負向或轉折用語／ 紅色底線 = 模板語言</div>
         </div>
         <div class="legend" id="legend" style="display:none;">
           <div class="legend-item"><div class="legend-dot" style="background:rgba(99,102,241,0.4);"></div>MOT接觸點詞</div>
           <div class="legend-item"><div class="legend-dot" style="background:rgba(245,158,11,0.4);"></div>感官描述詞</div>
-          <div class="legend-item"><div class="legend-dot" style="background:rgba(16,185,129,0.4);"></div>負面情節（真實信號）</div>
-          <div class="legend-item"><div class="legend-dot" style="background:rgba(239,68,68,0.3);"></div>模板語言（假評風險）</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(16,185,129,0.4);"></div>負向或轉折用語</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(239,68,68,0.3);"></div>預設套語線索</div>
         </div>
       </div>
     </div>
@@ -458,11 +458,11 @@ textarea:focus {
         <div class="panel-title">方法論說明</div>
       </div>
       <div class="panel-body" style="">
-        <p style="margin-bottom:8px;">本工具基於研究計畫書「拆解數位幻象」的理論框架，以 AI 語意分析引擎實作三個核心評分維度：</p>
+        <p style="margin-bottom:8px;">本工具基於研究計畫書「拆解數位幻象」的理論框架，以瀏覽器本地詞庫與固定規則示範三個文字線索維度，未串接 AI 語意模型：</p>
         <p><span style="color:var(--primary-bright);">SS（具體性分數）</span>：量化 MOT 服務接觸點詞彙密度，涵蓋人員互動、時空細節、感官描述。</p>
         <p><span style="color:var(--green);">TS（模板相似度偵測）</span>：識別制式化、重複性語言模式（如：「CP值高」「大推」「環境不錯服務好」）。</p>
-        <p><span style="color:var(--orange);">SG（情感細粒度）</span>：分析正負面情感混合程度——真實評論通常包含部分缺點或條件限制。</p>
-        <p style="margin-top:8px;border-top:1px solid var(--border);padding-top:8px;">評分由本地規則演算法執行（完全離線，無需網路連線），結合 PZB 服務品質理論與 MOT 真實瞬間理論框架。詞庫涵蓋 150+ 個中文服務接觸點詞彙與 50+ 個假評套語，對應研究計畫書附錄 F 之 Python 演算法實作。</p>
+        <p><span style="color:var(--orange);">SG（情感細粒度）</span>：整理預設正負向用語與轉折線索；情緒複雜或單一均不能證明評論真偽。</p>
+        <p style="margin-top:8px;border-top:1px solid var(--border);padding-top:8px;">頁面載入後，評分在瀏覽器內執行，輸入文字不會送往 AI 服務。分數、權重與門檻均為研究示意，尚未完成準確性與期望校準效果驗證；不同原型版本不宜直接比較。具體細節也可能被編造，簡短評論也可能是真實經驗。<br><strong>本工具不能判定評論真偽、作者身分或商家品質，分數不是可信度機率。</strong></p>
       </div>
     </div>
   </div>
@@ -474,7 +474,7 @@ textarea:focus {
     <div class="panel">
       <div class="panel-header">
         <div class="panel-dot" style="background:var(--primary);"></div>
-        <div class="panel-title">真實性評分</div>
+        <div class="panel-title">文字線索分數（示意）</div>
       </div>
       <div class="score-display">
         <div class="score-ring">
@@ -508,7 +508,7 @@ textarea:focus {
         </div>
         <div class="sub-score-item">
           <div class="sub-score-header">
-            <span class="sub-score-name">TS 模板相似度（越低越真實）</span>
+            <span class="sub-score-name">TS 預設套語線索（越低越少）</span>
             <span class="sub-score-val" id="tsVal" style="color:var(--green);">—</span>
           </div>
           <div class="sub-score-bar"><div class="sub-score-fill fill-ts" id="tsBar"></div></div>
@@ -555,7 +555,7 @@ textarea:focus {
           <div class="tags" id="sensoryTags"></div>
         </div>
         <div class="detail-section">
-          <div class="detail-title">負面情節（真實信號）</div>
+          <div class="detail-title">負向或轉折用語</div>
           <div class="tags" id="negativeTags"></div>
         </div>
         <div class="detail-section">
@@ -563,7 +563,7 @@ textarea:focus {
           <div class="tags" id="templateTags"></div>
         </div>
         <div class="detail-section">
-          <div class="detail-title">AI 分析說明</div>
+          <div class="detail-title">規則分析說明</div>
           <div class="explanation" id="explanationText"></div>
         </div>
       </div>
@@ -573,7 +573,7 @@ textarea:focus {
 </div>
 
 <div class="footer-note">
-  MOT Calibrator Demo v0.2 · 離線版（純規則演算法）· 基於「拆解數位幻象」研究計畫書 · 黄國津 · 建國科技大學
+  MOT Calibrator Demo v0.3 · 本地規則原型 · 2026-10-29 更新· 基於「拆解數位幻象」研究計畫書 · 黄國津 · 建國科技大學
 </div>
 
 <script>
@@ -598,13 +598,13 @@ async function analyze() {
   const btn = document.getElementById('analyzeBtn');
   btn.disabled = true;
   btn.classList.add('loading');
-  btn.querySelector('.btn-text').textContent = 'AI 分析中，請稍候…';
+  btn.querySelector('.btn-text').textContent = '整理文字線索中…';
 
   // Reset UI
   document.getElementById('scoreVal').textContent = '—';
   document.getElementById('riskBadge').className = 'risk-badge waiting';
   document.getElementById('riskBadge').textContent = '◎ 分析中…';
-  document.getElementById('riskDesc').textContent = '正在呼叫 AI 語意分析引擎…';
+  document.getElementById('riskDesc').textContent = '正在以本地詞庫與規則計算…';
   document.getElementById('scoreRing').style.strokeDashoffset = '364.4';
   document.getElementById('ssBar').style.width = '0%';
   document.getElementById('tsBar').style.width = '0%';
@@ -641,7 +641,7 @@ async function analyze() {
   } finally {
     btn.disabled = false;
     btn.classList.remove('loading');
-    btn.querySelector('.btn-text').textContent = '🔍 開始分析評論真實性';
+    btn.querySelector('.btn-text').textContent = '🔍 分析評論文字線索';
   }
 }
 
@@ -731,20 +731,20 @@ function computeSG(text) {
 // ── 期望校準建議 ──
 function getCalibrationMessage(riskLevel, ss, ts, sg) {
   if (riskLevel === 'green') {
-    return '這則評論包含豐富的服務接觸點細節，語言自然且情感複雜，具備高度真實性特徵。您可以參考此評論來設定合理的消費期望。';
+    return '本原型找到較多參考線索，但具體內容也可能被編造。建議核對評論來源、其他評論與實際服務資訊，再形成期望；高分不代表已確認真實。';
   } else if (riskLevel === 'orange') {
-    return '這則評論存在部分可疑特徵，建議同時參考其他評論再做決定。進店前不妨適度保留判斷空間，避免期望過高後產生落差感。';
+    return '本原型找到部分參考線索，尚不足以判斷評論真偽。請比較不同來源，區分可查證的描述與個人偏好，再決定如何使用這則評論。';
   } else {
-    return '這則評論高度疑似非真實消費者撰寫，缺乏具體服務接觸描述，且充斥制式化標籤語言。建議大幅下修消費期望，或尋找更多具體評論作為參考依據。';
+    return '本原型找到的參考線索有限，或包含較多預設套語；也可能是簡短、真實的感受。不能據此認定假評、AI 生成或商家品質，請補充其他來源再做決定。';
   }
 }
 
 // ── 分析說明 ──
 function getExplanation(ss, ts, sg, overall, riskLevel) {
   const ssDesc = ss >= 60 ? '具體性高（包含豐富服務接觸細節）' : ss >= 30 ? '具體性中等（部分細節描述）' : '具體性低（缺乏接觸點描述）';
-  const tsDesc = ts >= 60 ? '模板語言密度高（大量制式化套語）' : ts >= 30 ? '模板語言中等（部分套語）' : '語言自然（套語比例低）';
-  const sgDesc = sg >= 60 ? '情感複雜多元（有褒有貶，真實信號強）' : sg >= 30 ? '情感略有層次' : '情感單一（純正向或純負向，真實性存疑）';
-  return `本則評論的 SS 具體性分數為 ${ss}，${ssDesc}；TS 模板相似度為 ${ts}，${tsDesc}；SG 情感細粒度為 ${sg}，${sgDesc}。依加權公式（SS×0.45 + (100-TS)×0.30 + SG×0.25）計算整體分數為 ${overall}，判定為「${riskLevel === 'green' ? '高具體性' : riskLevel === 'orange' ? '中度疑慮' : '情深不壽'}」等級。`;
+  const tsDesc = ts >= 60 ? '模板語言密度高（大量制式化套語）' : ts >= 30 ? '模板語言中等（部分套語）' : '預設套語命中較少';
+  const sgDesc = sg >= 60 ? '偵測到較多正負向用語' : sg >= 30 ? '情感略有層次' : '預設正負向用語混合較少';
+  return `本則評論的 SS 具體性分數為 ${ss}，${ssDesc}；TS 模板相似度為 ${ts}，${tsDesc}；SG 情感細粒度為 ${sg}，${sgDesc}。依加權公式（SS×0.45 + (100-TS)×0.30 + SG×0.25）計算整體分數為 ${overall}，示意分級為「${riskLevel === 'green' ? '參考線索較多' : riskLevel === 'orange' ? '參考線索中等' : '參考線索有限'}」。權重與分級門檻尚待資料校準，不能據此推定真偽。`;
 }
 
 // ── 主函數 ──
@@ -756,11 +756,11 @@ function scoreReview(text) {
 
   let risk_level, risk_label, risk_desc;
   if (overall >= 65) {
-    risk_level = 'green'; risk_label = '高具體性 · 評論可信'; risk_desc = '評論具備真實服務體驗特徵';
+    risk_level = 'green'; risk_label = '參考線索較多（示意）'; risk_desc = '仍須查證，分數不代表真實性機率';
   } else if (overall >= 35) {
-    risk_level = 'orange'; risk_label = '中度疑慮 · 保留判斷'; risk_desc = '建議多參考其他評論';
+    risk_level = 'orange'; risk_label = '參考線索中等（示意）'; risk_desc = '建議多參考其他評論';
   } else {
-    risk_level = 'red'; risk_label = '情深不壽 · 謹慎消費'; risk_desc = '高度疑似非真實評論，建議下修期望';
+    risk_level = 'red'; risk_label = '參考線索有限（示意）'; risk_desc = '不能據此判定假評或商家品質';
   }
 
   // 找出偵測到的關鍵詞
@@ -883,3 +883,4 @@ function highlightText(text, r) {
 </script>
 </body>
 </html>
+
